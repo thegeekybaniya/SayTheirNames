@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { Icon } from "react-native-elements";
 
-import DonationsScreen from "./src/screens/DonationsScreen.js";
+import PeopleScreen from "./src/screens/PeopleScreen.js";
 import DonationListScreen from "./src/screens/DonationListScreen.js";
 import PetitionListScreen from "./src/screens/PetitionListScreen.js";
 import AboutScreen from "./src/screens/AboutScreen.js";
@@ -71,7 +71,7 @@ export default class App extends React.Component {
               inactiveTintColor: "gray",
             }}
           >
-            <Tab.Screen name="Home" component={DonationsScreen} />
+            <Tab.Screen name="Home" component={PeopleScreen} />
             <Tab.Screen name="Donations" component={DonationListScreen} />
             <Tab.Screen name="Petitions" component={PetitionListScreen} />
             <Tab.Screen name="About" component={AboutScreen} />

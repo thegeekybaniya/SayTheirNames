@@ -39,7 +39,6 @@ const AboutScreen = () => {
   if (dat.next == 1) {
     API.getPetitions()
       .then((data) => {
-        console.log(data.data.length);
 
         setData({
           next: dat.next + 1,
@@ -48,7 +47,7 @@ const AboutScreen = () => {
         });
       })
       .catch((err) => {
-        console.log("Huri Baba", err);
+        console.error( err);
       });
   }
 

@@ -36,7 +36,6 @@ export default class CustomButton extends Component {
     const { title } = this.props;
     const { onPress } = this.props;
     const { selected } = this.props;
-    console.log("Inside Button", selected)
     return (
       <Button
         title={title}

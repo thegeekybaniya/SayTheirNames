@@ -10,21 +10,21 @@ import {
   FlatList,
   Platform,
   TouchableHighlight,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import { AppLoading } from "expo";
 
 import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import { Header, Icon, Image, Button } from "react-native-elements";
+import { Header, Icon, Image, Button, Input } from "react-native-elements";
 
 import { ActivityIndicator } from "react-native";
 
 import Carousel from "react-native-snap-carousel";
 
 import Modal from "../components/Modal";
-import PersonDetail from "./PersonDetail.js"
+import PersonDetail from "./PersonDetail.js";
 
 import CustomButton from "../components/CustomButton";
 import Screen from "../components/Screen";
@@ -51,10 +51,8 @@ let updateFilters = (people, keyToFilter) => {
   for (let i = 0; i < people.length; i++) {
     let peep = people[i];
     let ks = Object.keys(keyToFilter);
-    console.log("Peep", peep.full_name);
     for (let j = 0; j < ks.length; j++) {
       let k = ks[j];
-      console.log("krt", keyToFilter[k]);
       keyToFilter[k].add(peep[k]);
     }
   }
@@ -62,7 +60,7 @@ let updateFilters = (people, keyToFilter) => {
   return keyToFilter;
 };
 
-const DonationListScreen = ({navigation}) => {
+const PeopleListScreen = ({ navigation }) => {
   const [dat, setData] = useState({
     next: 1,
     people: [],
@@ -74,8 +72,13 @@ const DonationListScreen = ({navigation}) => {
     filter: {},
     openFilter: null,
   });
+
+  const [searchModal, setSearchModal] = useState({
+    visible: false,
+    search: null,
+  });
+
   let filterButtonPress = (filter) => {
-    console.log("Show filter for ", filter, dat.next, filterModal);
 
     setFilterModal({
       ...filterModal,
@@ -87,7 +90,6 @@ const DonationListScreen = ({navigation}) => {
   if (dat.next == 1) {
     API.getPeople()
       .then((data) => {
-        console.log(data.data.length);
         let ktf = updateFilters(data.data, dat.keyToFilter);
 
         setData({
@@ -98,12 +100,10 @@ const DonationListScreen = ({navigation}) => {
         });
       })
       .catch((err) => {
-        console.log("Huri Baba", err);
+        console.error(err);
       });
   }
-  console.log("Peeps", dat.next, dat.last);
 
-  console.log(keyToFilter, filterModal);
   const _renderItem = ({ item, index }) => {
     return (
       <View>
@@ -117,16 +117,20 @@ const DonationListScreen = ({navigation}) => {
     );
   };
 
-  console.log(
-    "SCREEN",
-    SCREEN_WIDTH,
-    filterModal.openFilter && dat.keyToFilter[filterModal.openFilter]
-  );
+
 
   let displayData = _.filter(
     dat.people,
     _.matches(_.omitBy(filterModal.filter, _.isNil))
   );
+
+  if (searchModal.search) {
+    displayData = _.filter(displayData, (value) => {
+      return JSON.stringify(value)
+        .toLowerCase()
+        .includes(searchModal.search.toLowerCase());
+    });
+  }
   return (
     <>
       <View style={styles.container}>
@@ -148,12 +152,18 @@ const DonationListScreen = ({navigation}) => {
                       type="feather"
                       color="white"
                     />
-                    <Icon
-                      style={{ margin: 10 }}
-                      name="search"
-                      type="feather"
-                      color="white"
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSearchModal({ ...searchModal, visible: true });
+                      }}
+                    >
+                      <Icon
+                        style={{ margin: 10 }}
+                        name="search"
+                        type="feather"
+                        color="white"
+                      />
+                    </TouchableOpacity>
                   </View>
                 }
               />
@@ -191,10 +201,7 @@ const DonationListScreen = ({navigation}) => {
                       FILTER
                     </Text>
                     {Object.keys(titleToKey).map((k) => {
-                      console.log(
-                        k,
-                        filterModal.filter[titleToKey[k]] ? true : false
-                      );
+                     
                       return (
                         <CustomButton
                           title={k}
@@ -222,13 +229,30 @@ const DonationListScreen = ({navigation}) => {
                 layoutCardOffset={3}
                 loop
               />
+
+              {searchModal.search && (
+                <Text
+                  style={{
+                    color: "black",
+                    fontFamily: "Karla",
+                    paddingVertical: 10,
+                  }}
+                >
+                  Showing results matching{" "}
+                  <Text style={{ fontWeight: "bold" }}>
+                    {searchModal.search}
+                  </Text>
+                </Text>
+              )}
             </View>
           }
           style={{ width: "100%" }}
           contentContainerStyle={{ justifyContent: "center" }}
           data={displayData}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={()=>navigation.navigate("DonationDetailScreen",item)}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("DonationDetailScreen", item)}
+            >
               <PeopleCard data={item} />
             </TouchableOpacity>
           )}
@@ -237,7 +261,6 @@ const DonationListScreen = ({navigation}) => {
           onEndReached={() => {
             if (dat.last != null && dat.next <= dat.last) {
               API.getPeopleNext(dat.next).then((data) => {
-                console.log(data.data.length);
                 let ktf = updateFilters(data.data, dat.keyToFilter);
 
                 setData({
@@ -287,7 +310,6 @@ const DonationListScreen = ({navigation}) => {
             }
             keyExtractor={(item) => item.toString()}
             renderItem={({ item }) => {
-              console.log("Modal", item);
               return (
                 <Button
                   title={item}
@@ -314,6 +336,42 @@ const DonationListScreen = ({navigation}) => {
           />
         </Screen>
       </Modal>
+      <Modal visible={searchModal.visible} animationType="slide">
+        <Screen>
+          <Input
+            style={{ padding: 10 }}
+            placeholder="Search"
+            value={searchModal.search}
+            leftIcon={<Icon name="search" type="feather" color="grey" />}
+            onChangeText={(value) =>
+              setSearchModal({ ...searchModal, search: value })
+            }
+          />
+          <Button
+            style={{ padding: 10 }}
+            titleStyle={{ color: "white" }}
+            buttonStyle={{ backgroundColor: "black", padding: 10 }}
+            title="Close"
+            onPress={() =>
+              setSearchModal({ ...searchModal, visible: !searchModal.visible })
+            }
+          />
+
+          <Button
+            style={{ paddingHorizontal: 10, paddingVertical: 5 }}
+            titleStyle={{ color: "white" }}
+            buttonStyle={{ backgroundColor: "black", padding: 10 }}
+            title="Clear"
+            onPress={() => {
+              setSearchModal({
+                ...searchModal,
+                visible: !searchModal.visible,
+                search: null,
+              });
+            }}
+          />
+        </Screen>
+      </Modal>
     </>
   );
 };
@@ -331,7 +389,7 @@ const styles = StyleSheet.create({
 
 const DonationStack = createStackNavigator();
 
-const DonationsScreen = () => {
+const PeopleScreen = () => {
   return (
     <DonationStack.Navigator
       screenOptions={{
@@ -340,7 +398,7 @@ const DonationsScreen = () => {
     >
       <DonationStack.Screen
         name="DonationListScreen"
-        component={DonationListScreen}
+        component={PeopleListScreen}
       />
       <DonationStack.Screen
         name="DonationDetailScreen"
@@ -350,4 +408,4 @@ const DonationsScreen = () => {
   );
 };
 
-export default DonationsScreen;
+export default PeopleScreen;

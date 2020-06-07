@@ -39,7 +39,6 @@ const AboutScreen = () => {
   if (dat.next == 1) {
     API.getPetitions()
       .then((data) => {
-
         setData({
           next: dat.next + 1,
           petitions: dat.petitions.concat(data.data),
@@ -47,7 +46,7 @@ const AboutScreen = () => {
         });
       })
       .catch((err) => {
-        console.error( err);
+        console.error(err);
       });
   }
 
@@ -119,6 +118,50 @@ const AboutScreen = () => {
             }}
             onPress={() => {
               Linking.openURL("https://github.com/Say-Their-Name");
+            }}
+            containerStyle={{ paddingVertical: 10 }}
+          />
+
+          <Button
+            buttonStyle={{
+              borderRadius: 5,
+              marginLeft: 0,
+              marginRight: 0,
+              marginBottom: 0,
+              borderColor: "black",
+              backgroundColor: "white",
+            }}
+            type="outline"
+            title={"Checkout on Expo".toUpperCase()}
+            titleStyle={{
+              fontFamily: "Karla",
+              color: "black",
+              fontWeight: "bold",
+            }}
+            onPress={() => {
+              Linking.openURL("https://expo.io/@thegeekybaniya/Say-Their-Names");
+            }}
+            containerStyle={{ paddingVertical: 10 }}
+          />
+
+          <Button
+            buttonStyle={{
+              borderRadius: 5,
+              marginLeft: 0,
+              marginRight: 0,
+              marginBottom: 0,
+              borderColor: "black",
+              backgroundColor: "white",
+            }}
+            type="outline"
+            title={"Contribute to this repo".toUpperCase()}
+            titleStyle={{
+              fontFamily: "Karla",
+              color: "black",
+              fontWeight: "bold",
+            }}
+            onPress={() => {
+              Linking.openURL("https://github.com/thegeekybaniya/SayTheirNames");
             }}
             containerStyle={{ paddingVertical: 10 }}
           />
